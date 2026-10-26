@@ -388,6 +388,9 @@ public class PaymentAmountManipulationScanRule extends AbstractAppParamPlugin
         } catch (JSONException e) {
             return false;
         }
+        if (json.isNullObject()) {
+            return false;
+        }
         return ERROR_KEYS.stream().anyMatch(key -> hasErrorValue(json, key))
                 || SUCCESS_FLAG_KEYS.stream()
                         .anyMatch(key -> json.has(key) && Boolean.FALSE.equals(json.get(key)))

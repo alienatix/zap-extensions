@@ -617,6 +617,7 @@ class PaymentAmountManipulationScanRuleUnitTest
                 "{\"status\":\"ok\",\"note\":\"not invalid\",\"amount\":-10.00}",
                 "{\"data\":{\"error\":\"x\"},\"amount\":-10.00}",
                 "amount=-10.00",
+                "null",
                 "<p>error: amount -10.00</p>"
             })
     void shouldNotTreatOtherBodiesAsErrors(String body) {
