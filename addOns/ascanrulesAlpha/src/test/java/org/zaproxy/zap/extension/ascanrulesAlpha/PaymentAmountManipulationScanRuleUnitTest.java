@@ -569,6 +569,21 @@ class PaymentAmountManipulationScanRuleUnitTest
         assertThat(handler.rawBodies, contains("{\"amount\":[-10]}", "{\"amount\":[0]}"));
     }
 
+    @Test
+    void shouldNegateExplicitlyPositiveAmount() throws Exception {
+        // Given
+        AmountHandler handler =
+                new AmountHandler(
+                        PATH, "amount", PaymentAmountManipulationScanRuleUnitTest::rejectInvalid);
+        nano.addHandler(handler);
+        rule.setAttackStrength(AttackStrength.LOW);
+        rule.init(postMessage("amount=%2B10"), parent);
+        // When
+        rule.scan();
+        // Then
+        assertThat(handler.received, contains("-10", "0"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"PUT", "PATCH", "DELETE"})
     void shouldAlertForOtherStateChangingMethods(String method) throws Exception {

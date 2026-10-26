@@ -79,6 +79,7 @@ public class PaymentAmountManipulationScanRule extends AbstractAppParamPlugin
 
     private static final Pattern CURRENCY_OR_SPACE = Pattern.compile("[\\p{Sc}\\s]");
     private static final Pattern JSON_NUMBER = Pattern.compile("-?\\d+(\\.\\d+)?([eE][+-]?\\d+)?");
+    private static final Pattern LEADING_PLUS = Pattern.compile("^([\\p{Sc}\\s]*)\\+");
     private static final Pattern EXPONENT = Pattern.compile("[eE]");
     private static final Pattern THOUSANDS_SEPARATED =
             Pattern.compile("\\d{1,3}(,\\d{3})+(\\.\\d+)?");
@@ -192,7 +193,7 @@ public class PaymentAmountManipulationScanRule extends AbstractAppParamPlugin
         try {
             ComparableResponse baseline = new ComparableResponse(getBaseMsg(), null);
             Set<BigDecimal> baselineNumbers = numbersIn(getBaseMsg());
-            String negatedPayload = "-" + paramValue;
+            String negatedPayload = negate(paramValue);
             boolean jsonNumber = isJsonNumber(paramName);
             Candidate candidate = null;
 
@@ -280,6 +281,10 @@ public class PaymentAmountManipulationScanRule extends AbstractAppParamPlugin
         return index > 0 && body.charAt(index - 1) != '"';
     }
 
+    private static String negate(String value) {
+        return "-" + LEADING_PLUS.matcher(value).replaceFirst("$1");
+    }
+
     private boolean isSimilar(HttpMessage msg, ComparableResponse baseline) {
         return new ComparableResponse(msg, null).compareWith(baseline) >= SIMILARITY_THRESHOLD;
     }
@@ -305,7 +310,7 @@ public class PaymentAmountManipulationScanRule extends AbstractAppParamPlugin
     private List<String> getPayloads(String value, BigDecimal amount) {
         List<String> payloads = new ArrayList<>();
         if (amount.signum() > 0) {
-            payloads.add("-" + value);
+            payloads.add(negate(value));
         }
         if (amount.signum() != 0) {
             payloads.add(ZERO_AMOUNT);
